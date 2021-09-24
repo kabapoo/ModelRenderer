@@ -78,7 +78,7 @@ private:
 	// Models
 	Model* pModel;
 
-	std::string env_filename = "D:/repos/env/pink_sunrise_4k.hdr";
+	std::string env_filename = "D:/Data/env/pink_sunrise_4k.hdr";
 };
 
 #endif

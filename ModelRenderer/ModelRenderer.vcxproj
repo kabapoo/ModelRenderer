@@ -161,11 +161,27 @@
     <ClCompile Include="environment.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="material.cpp" />
+    <ClCompile Include="mesh.cpp" />
+    <ClCompile Include="model.cpp" />
     <ClCompile Include="polygon.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="stb_image_resize.cpp" />
     <ClCompile Include="stb_image_write.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="pbrTexture.frag" />
+    <None Include="shader_code\background.frag" />
+    <None Include="shader_code\background.vert" />
+    <None Include="shader_code\brdf.frag" />
+    <None Include="shader_code\brdf.vert" />
+    <None Include="shader_code\cubemap.frag" />
+    <None Include="shader_code\cubemap.vert" />
+    <None Include="shader_code\irradiance.frag" />
+    <None Include="shader_code\modeling.frag" />
+    <None Include="shader_code\pbr.frag" />
+    <None Include="shader_code\pbr.vert" />
+    <None Include="shader_code\prefilter.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

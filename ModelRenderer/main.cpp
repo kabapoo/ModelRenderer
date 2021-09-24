@@ -38,7 +38,7 @@ ModelRenderer::ModelRenderer(GLFWwindow* window, Camera* _camera)
 	// basic material
 	glm::vec3 color(0.1f, 0.12f, 0.4f);
 	float metal = 0.00f;
-	float rough = 0.85f;
+	float rough = 0.15f;
 	pMaterial = new Material(color, rough, metal);
 
 	pPBRShader = NULL;
@@ -48,7 +48,7 @@ ModelRenderer::ModelRenderer(GLFWwindow* window, Camera* _camera)
 	pBRDFmap = NULL;
 	pBackgroundShader = NULL;
 
-	pModel = new Model("resources/models/survival_guitar_backpack.obj");
+	pModel = new Model("D:/Data/models/Sculpture/Venus Cornell.obj");
 }
 
 void ModelRenderer::run()
@@ -123,6 +123,7 @@ void ModelRenderer::setPBRShader()
 	pPBRShader->setVec3("albedo", pMaterial->getColor());
 	pPBRShader->setFloat("roughness", pMaterial->getRoughness());
 	pPBRShader->setFloat("metallic", pMaterial->getMetallic());
+	pPBRShader->setFloat("ao", 1.0f);
 }
 
 GLFWwindow* initGL()

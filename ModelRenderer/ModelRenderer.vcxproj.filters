@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\GLSL">
+      <UniqueIdentifier>{92e87934-155b-4145-ab32-0eb18879b7f9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -77,5 +80,49 @@
     <ClCompile Include="polygon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader_code\background.frag">
+      <Filter>Source Files\GLSL</Filter>
+    </None>
+    <None Include="shader_code\background.vert">
+      <Filter>Source Files\GLSL</Filter>
+    </None>
+    <None Include="shader_code\brdf.frag">
+      <Filter>Source Files\GLSL</Filter>
+    </None>
+    <None Include="shader_code\brdf.vert">
+      <Filter>Source Files\GLSL</Filter>
+    </None>
+    <None Include="shader_code\cubemap.frag">
+      <Filter>Source Files\GLSL</Filter>
+    </None>
+    <None Include="shader_code\cubemap.vert">
+      <Filter>Source Files\GLSL</Filter>
+    </None>
+    <None Include="shader_code\irradiance.frag">
+      <Filter>Source Files\GLSL</Filter>
+    </None>
+    <None Include="shader_code\modeling.frag">
+      <Filter>Source Files\GLSL</Filter>
+    </None>
+    <None Include="shader_code\pbr.frag">
+      <Filter>Source Files\GLSL</Filter>
+    </None>
+    <None Include="shader_code\pbr.vert">
+      <Filter>Source Files\GLSL</Filter>
+    </None>
+    <None Include="shader_code\prefilter.frag">
+      <Filter>Source Files\GLSL</Filter>
+    </None>
+    <None Include="pbrTexture.frag">
+      <Filter>Source Files\GLSL</Filter>
+    </None>
   </ItemGroup>
 </Project>
