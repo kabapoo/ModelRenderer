@@ -5,15 +5,16 @@ int main(int argc, char* argv[])
 	GLFWwindow* window = initGL();
 	ModelRenderer mainRenderer(window, &camera);
 
+	// load parameter file
+	view_angles = load2Params(camera_path.c_str(), param_row);
+	params = load5Params(param_path.c_str(), param_row);
+
 	// Load various shaders
 	mainRenderer.loadShaders();
 
-	int scrWidth, scrHeight;
-	glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
-	glViewport(0, 0, scrWidth, scrHeight);
-
 	// main rendering loop
-	mainRenderer.run();
+	//mainRenderer.run(window);
+	mainRenderer.save(window, save_path);
 
 	// optional: de-allocate all resources once they've outlived their purpose:
 	// ------------------------------------------------------------------------
@@ -32,7 +33,7 @@ ModelRenderer::ModelRenderer(GLFWwindow* window, Camera* _camera)
 	pWindow = window;
 	pCamera = _camera;
 	
-	pSphere = new Sphere(64, 64);
+	pSphere = new Sphere(128, 128);
 	pCube = new Cube();
 
 	// basic material
@@ -48,11 +49,22 @@ ModelRenderer::ModelRenderer(GLFWwindow* window, Camera* _camera)
 	pBRDFmap = NULL;
 	pBackgroundShader = NULL;
 
-	pModel = new Model("D:/Data/models/Sculpture/Venus Cornell.obj");
+	pModel = new Model(model_path.c_str());
+	pModel->position = glm::mat4(1.0f);
+	pModel->position = glm::translate(pModel->position, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+	pModel->position = glm::scale(pModel->position, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
 }
 
-void ModelRenderer::run()
+void ModelRenderer::run(GLFWwindow* _window)
 {
+	createMaps(env_path + env_filename);
+
+	int scrWidth, scrHeight;
+	glfwGetFramebufferSize(_window, &scrWidth, &scrHeight);
+	glViewport(0, 0, scrWidth, scrHeight);
+
+	pCamera->SetRandomPosition(camera_dist);
+
 	while (!glfwWindowShouldClose(pWindow))
 	{
 		// per-frame time logic
@@ -67,7 +79,7 @@ void ModelRenderer::run()
 
 		// render
 		// ------
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		setPBRShader();
@@ -81,10 +93,7 @@ void ModelRenderer::run()
 		glBindTexture(GL_TEXTURE_2D, pBRDFmap->getID());
 
 		//pSphere->render();
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
-		pPBRShader->setMat4("model", model);
+		pPBRShader->setMat4("model", pModel->position);
 		pModel->Draw(pPBRShader);
 
 		// skybox
@@ -94,11 +103,75 @@ void ModelRenderer::run()
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, pCubemap->getID());
 		pCube->render();
-		
+
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
 		glfwSwapBuffers(pWindow);
 		glfwPollEvents();
+	}
+}
+
+void ModelRenderer::save(GLFWwindow* _window, std::string _path)
+{
+	int cnt = 0;
+	// load env map
+	std::vector<std::string> env_list;
+	std::vector<std::string> env_name;
+	int env_count = 0;
+	pCubemap->loadEnvfromDirectory(env_path, env_list, env_name, env_count);
+
+	for (int i = 0; i < ENV_NUM; i++)
+	{
+		createMaps(env_list[i].c_str());
+
+		int scrWidth, scrHeight;
+		glfwGetFramebufferSize(_window, &scrWidth, &scrHeight);
+		glViewport(0, 0, scrWidth, scrHeight);
+
+		for (int j = 0; j < 10; j++)
+		{
+			cnt = i * 10 + j;
+			// set camera view
+			std::array<float, 2> view_angle = view_angles[cnt];
+			pCamera->SetPositionDist(view_angle[0], view_angle[1], camera_dist);
+
+			// render
+			// ------
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			std::array<float, 5> param = params[cnt];
+			pMaterial->setColor(glm::vec3(param[0], param[1], param[2]));
+			pMaterial->setMetallic(param[3]);
+			pMaterial->setRoughness(param[4]);
+			setPBRShader();
+
+			// bind pre-computed IBL data
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, pIrradiancemap->getID());
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, pPrefilteredmap->getID());
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, pBRDFmap->getID());
+
+			pPBRShader->setMat4("model", pModel->position); 
+			pSphere->render();
+			//pModel->Draw(pPBRShader);
+
+			// enumerate the screenshot filename
+			std::string path = "IMG";
+			std::string number = std::to_string(cnt++);
+			std::stringstream ss;
+			ss << std::setw(5) << std::setfill('0') << number;
+			path = _path + path + ss.str() + ".jpg";
+
+			saveScreenshot(path, 160, 160);
+
+			// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+			// -------------------------------------------------------------------------------
+			glfwSwapBuffers(pWindow);
+			glfwPollEvents();
+		}
 	}
 }
 
@@ -110,9 +183,9 @@ void ModelRenderer::setPBRShader()
 	pPBRShader->setInt("brdfLUT", 2);
 
 	// pass projection, view, and model matrices to shader
-	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+	glm::mat4 projection = glm::perspective(glm::radians(pCamera->Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 	pPBRShader->setMat4("projection", projection);
-	glm::mat4 view = camera.GetViewMatrix();
+	glm::mat4 view = pCamera->GetViewMatrix();
 	pPBRShader->setMat4("view", view);
 	glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
 	pPBRShader->setMat4("model", model);
@@ -182,21 +255,25 @@ void ModelRenderer::loadShaders()
 	pBRDFmap = new BRDFmap("./shader_code/brdf.vert", "./shader_code/brdf.frag", pCubemap);
 	pBackgroundShader = new Shader("./shader_code/background.vert", "./shader_code/background.frag");
 
-	// load environment
-	pCubemap->loadHDR(env_filename.c_str());
-	pCubemap->create();
-
-	// pre-calculate illumination maps
-	pIrradiancemap->create();
-	pPrefilteredmap->create();
-	pBRDFmap->create();
-
 	// background shader
 	pBackgroundShader->use();
 	pBackgroundShader->setInt("environmentMap", 0);
 	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 	pBackgroundShader->setMat4("projection", projection);
 }
+
+void ModelRenderer::createMaps(std::string env_path)
+{
+	// load environment
+	pCubemap->loadHDR(env_path.c_str());
+	pCubemap->create();
+
+	// pre-calculate illumination maps
+	pIrradiancemap->create();
+	pPrefilteredmap->create();
+	pBRDFmap->create();
+}
+
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
@@ -256,4 +333,79 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera.ProcessMouseScroll((float)yoffset);
+}
+
+bool saveScreenshot(std::string filename, int width, int height)
+{
+	// row alignment
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+	int nScrSize = SCR_WIDTH * SCR_HEIGHT * 4;
+	int nSize = width * height * 4;
+	unsigned char* dataBuffer = (unsigned char*)malloc(nScrSize * sizeof(unsigned char));
+	unsigned char* resizedBuffer = (unsigned char*)malloc(nSize * sizeof(unsigned char));
+	if (!dataBuffer) {
+		std::cout << "saveScreenshot() :: buffer allocation error." << std::endl;
+		return false;
+	}
+
+	// fetch image from the backbuffer
+	glReadPixels((GLint)0, (GLint)0, (GLint)SCR_WIDTH, (GLint)SCR_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, dataBuffer);
+
+	stbir_resize(dataBuffer, SCR_WIDTH, SCR_HEIGHT, 0, resizedBuffer, width, height, 0,
+		STBIR_TYPE_UINT8, 4, STBIR_ALPHA_CHANNEL_NONE, 0,
+		STBIR_EDGE_CLAMP, STBIR_EDGE_CLAMP, STBIR_FILTER_DEFAULT, STBIR_FILTER_DEFAULT,
+		STBIR_COLORSPACE_SRGB, nullptr);
+	stbi_flip_vertically_on_write(true);
+	stbi_write_jpg(filename.c_str(), width, height, 4, resizedBuffer, 100);
+
+	free(dataBuffer);
+	free(resizedBuffer);
+
+	std::cout << "saving screenshot(" << filename << ")\n";
+	return true;
+}
+
+std::vector<std::array<float, 2>> load2Params(const char* filename, int rows)
+{
+	std::ifstream fin;
+	fin.open(filename, std::ios::in | std::ios::binary);
+
+	std::vector<std::array<float, 2>> samples;
+	std::array<float, 2> temp;
+
+	float param[2];
+	for (int i = 0; i < rows; ++i)
+	{
+		fin.read((char*)param, sizeof(param));
+		for (int j = 0; j < 2; ++j)
+		{
+			temp[j] = param[j];
+		}
+		samples.push_back(temp);
+	}
+	fin.close();
+	return samples;
+}
+
+std::vector<std::array<float, 5>> load5Params(const char* filename, int rows)
+{
+	std::ifstream fin;
+	fin.open(filename, std::ios::in | std::ios::binary);
+
+	std::vector<std::array<float, 5>> samples;
+	std::array<float, 5> temp;
+
+	float param[5];
+	for (int i = 0; i < rows; ++i)
+	{
+		fin.read((char*)param, sizeof(param));
+		for (int j = 0; j < 5; ++j)
+		{
+			temp[j] = param[j];
+		}
+		samples.push_back(temp);
+	}
+	fin.close();
+	return samples;
 }

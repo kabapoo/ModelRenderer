@@ -84,7 +84,7 @@ public:
     void ProcessMouseScroll(float yoffset);
 
     // for random sample rendering
-    void SetRandomPosition();
+    void SetRandomPosition(float dist);
     void SetPosition(float yaw, float pitch);
     void SetPositionDist(float yaw, float pitch, float dist);
 

@@ -109,9 +109,6 @@
     <None Include="shader_code\irradiance.frag">
       <Filter>Source Files\GLSL</Filter>
     </None>
-    <None Include="shader_code\modeling.frag">
-      <Filter>Source Files\GLSL</Filter>
-    </None>
     <None Include="shader_code\pbr.frag">
       <Filter>Source Files\GLSL</Filter>
     </None>

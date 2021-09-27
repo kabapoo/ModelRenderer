@@ -178,7 +178,6 @@
     <None Include="shader_code\cubemap.frag" />
     <None Include="shader_code\cubemap.vert" />
     <None Include="shader_code\irradiance.frag" />
-    <None Include="shader_code\modeling.frag" />
     <None Include="shader_code\pbr.frag" />
     <None Include="shader_code\pbr.vert" />
     <None Include="shader_code\prefilter.frag" />

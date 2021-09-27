@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <array>
 #include <string>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -26,6 +27,8 @@
 #define SCR_WIDTH 640
 #define SCR_HEIGHT 640
 
+#define ENV_NUM 100
+
 double lastX = SCR_WIDTH / 2.0;
 double lastY = SCR_HEIGHT / 2.0;
 bool firstMouse = true;
@@ -40,11 +43,30 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
+bool saveScreenshot(std::string filename, int width, int height);
+
+std::vector<std::array<float, 2>> load2Params(const char* filename, int rows);
+std::vector<std::array<float, 2>> view_angles;
+std::vector<std::array<float, 5>> load5Params(const char* filename, int rows);
+std::vector<std::array<float, 5>> params;
 
 GLFWwindow*		initGL();
 
+std::string model_name = "porsche-911-turbo";
+
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 1.0f));
+const float camera_dist = 0.5f;
+
+std::string param_path = "D:/Data/param/input/" + model_name + ".bin";
+const int param_row = 1000;
+std::string camera_path = "D:/Data/param/input/" + model_name + "_camera_dist.bin";
+std::string model_path = "D:/Data/models/vehicle/" + model_name + ".obj";
+
+std::string env_path = "D:/Data/env/";
+std::string env_filename = "pink_sunrise_4k.hdr";
+
+std::string save_path = "D:/Data/img/vehicle/" + model_name + "/sphere/";
 
 class ModelRenderer
 {
@@ -52,9 +74,16 @@ public:
 	ModelRenderer(GLFWwindow* window, Camera* _camera);
 
 	void loadShaders();
-	void run();
+	void createMaps(std::string env_path);
+	void run(GLFWwindow* _window);
+	void save(GLFWwindow* _window, std::string _path);
 
 	void setPBRShader();
+
+	// camera
+	Camera* pCamera;
+	// Material
+	Material* pMaterial;
 
 private:
 	GLFWwindow* pWindow;
@@ -66,19 +95,12 @@ private:
 	BRDFmap* pBRDFmap;
 	Shader* pBackgroundShader;
 
-	// camera
-	Camera* pCamera;
-	// Material
-	Material* pMaterial;
-
 	// sphere initialzied as radius, sectors, stacks
 	Sphere* pSphere;
 	Cube* pCube;
 
 	// Models
 	Model* pModel;
-
-	std::string env_filename = "D:/Data/env/pink_sunrise_4k.hdr";
 };
 
 #endif

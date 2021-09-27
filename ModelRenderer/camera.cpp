@@ -58,15 +58,15 @@ void Camera::updateCameraVectors()
     //std::cout << front.x << " " << front.y << " " << front.z << std::endl;
 }
 
-void Camera::SetRandomPosition()
+void Camera::SetRandomPosition(float dist)
 {
     Yaw = (float)(rand() % 360 - 180);
-    Pitch = (float)(rand() % 180 - 90);
+    Pitch = -(float)(rand() % 45);
     Position.x = -cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
     Position.y = -sin(glm::radians(Pitch));
     Position.z = -sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
     Position = glm::normalize(Position);
-    Position = Position * 3.0f;
+    Position = Position * dist;
     //std::cout << Position.x << " " << Position.y << " " << Position.z << std::endl;
     updateCameraVectors();
 }
