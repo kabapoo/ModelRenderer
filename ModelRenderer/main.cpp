@@ -51,8 +51,9 @@ ModelRenderer::ModelRenderer(GLFWwindow* window, Camera* _camera)
 
 	pModel = new Model(model_path.c_str());
 	pModel->position = glm::mat4(1.0f);
-	pModel->position = glm::translate(pModel->position, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-	pModel->position = glm::scale(pModel->position, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+	//pModel->position = glm::rotate(pModel->position, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
+	//pModel->position = glm::translate(pModel->position, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+	pModel->position = glm::scale(pModel->position, glm::vec3(0.5f, 0.5f, 0.5f));	// it's a bit too big for our scene, so scale it down
 }
 
 void ModelRenderer::run(GLFWwindow* _window)
@@ -155,9 +156,11 @@ void ModelRenderer::save(GLFWwindow* _window, std::string _path)
 			glBindTexture(GL_TEXTURE_2D, pBRDFmap->getID());
 
 			pPBRShader->setMat4("model", pModel->position); 
+#if DRAW_MODE == 1
+			pModel->Draw(pPBRShader);
+#elif DRAW_MODE == 2
 			pSphere->render();
-			//pModel->Draw(pPBRShader);
-
+#endif
 			// enumerate the screenshot filename
 			std::string path = "IMG";
 			std::string number = std::to_string(cnt++);
@@ -165,7 +168,7 @@ void ModelRenderer::save(GLFWwindow* _window, std::string _path)
 			ss << std::setw(5) << std::setfill('0') << number;
 			path = _path + path + ss.str() + ".jpg";
 
-			saveScreenshot(path, 160, 160);
+			saveScreenshot(path, 256, 256);
 
 			// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 			// -------------------------------------------------------------------------------

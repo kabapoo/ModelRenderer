@@ -52,11 +52,16 @@ std::vector<std::array<float, 5>> params;
 
 GLFWwindow*		initGL();
 
-std::string model_name = "porsche-911-turbo";
+#define DRAW_MODE 1
+std::string model_name = "audi-q7";
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 1.0f));
-const float camera_dist = 0.5f;
+#if DRAW_MODE == 1
+const float camera_dist = 15.0f;
+#elif DRAW_MODE == 2
+const float camera_dist = 3.0f;
+#endif
 
 std::string param_path = "D:/Data/param/input/" + model_name + ".bin";
 const int param_row = 1000;
@@ -66,7 +71,11 @@ std::string model_path = "D:/Data/models/vehicle/" + model_name + ".obj";
 std::string env_path = "D:/Data/env/";
 std::string env_filename = "pink_sunrise_4k.hdr";
 
+#if DRAW_MODE == 1
+std::string save_path = "D:/Data/img/vehicle/" + model_name + "/origin/";
+#elif DRAW_MODE == 2
 std::string save_path = "D:/Data/img/vehicle/" + model_name + "/sphere/";
+#endif
 
 class ModelRenderer
 {

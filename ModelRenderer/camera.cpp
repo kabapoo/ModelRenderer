@@ -92,7 +92,7 @@ void Camera::SetPositionDist(float yaw, float pitch, float dist)
     Position.y = -sin(glm::radians(Pitch));
     Position.z = -sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
     Position = glm::normalize(Position);
-    Position = Position * (3.0f + dist);
+    Position = Position * dist;
     //std::cout << Position.x << " " << Position.y << " " << Position.z << std::endl;
     updateCameraVectors();
 }
