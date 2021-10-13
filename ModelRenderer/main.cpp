@@ -37,9 +37,9 @@ ModelRenderer::ModelRenderer(GLFWwindow* window, Camera* _camera)
 	pCube = new Cube();
 
 	// basic material
-	glm::vec3 color(0.1f, 0.12f, 0.4f);
-	float metal = 0.00f;
-	float rough = 0.15f;
+	glm::vec3 color(0.9f, 0.9f, 0.9f);
+	float metal = 1.00f;
+	float rough = 0.05f;
 	pMaterial = new Material(color, rough, metal);
 
 	pPBRShader = NULL;
@@ -140,13 +140,17 @@ void ModelRenderer::save(GLFWwindow* _window, std::string _path)
 			// ------
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+#if DRAW_MODE == 1 || DRAW_MODE == 2
 			std::array<float, 5> param = params[cnt];
 			pMaterial->setColor(glm::vec3(param[0], param[1], param[2]));
 			pMaterial->setMetallic(param[3]);
 			pMaterial->setRoughness(param[4]);
+#elif DRAW_MODE == 3
+			pMaterial->setColor(pMaterial->getColor());
+			pMaterial->setMetallic(pMaterial->getMetallic());
+			pMaterial->setRoughness(pMaterial->getRoughness());
+#endif
 			setPBRShader();
-
 			// bind pre-computed IBL data
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, pIrradiancemap->getID());
@@ -158,7 +162,7 @@ void ModelRenderer::save(GLFWwindow* _window, std::string _path)
 			pPBRShader->setMat4("model", pModel->position); 
 #if DRAW_MODE == 1
 			pModel->Draw(pPBRShader);
-#elif DRAW_MODE == 2
+#elif DRAW_MODE == 2 || DRAW_MODE == 3
 			pSphere->render();
 #endif
 			// enumerate the screenshot filename

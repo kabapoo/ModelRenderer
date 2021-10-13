@@ -53,13 +53,15 @@ std::vector<std::array<float, 5>> params;
 GLFWwindow*		initGL();
 
 #define DRAW_MODE 1
-std::string model_name = "audi-q7";
+std::string model_name = "1995-jaguar-xj12-lwb-x305";
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 1.0f));
 #if DRAW_MODE == 1
-const float camera_dist = 15.0f;
+const float camera_dist = 18.0f;
 #elif DRAW_MODE == 2
+const float camera_dist = 3.0f;
+#elif DRAW_MODE == 3
 const float camera_dist = 3.0f;
 #endif
 
@@ -75,6 +77,8 @@ std::string env_filename = "pink_sunrise_4k.hdr";
 std::string save_path = "D:/Data/img/vehicle/" + model_name + "/origin/";
 #elif DRAW_MODE == 2
 std::string save_path = "D:/Data/img/vehicle/" + model_name + "/sphere/";
+#elif DRAW_MODE == 3
+std::string save_path = "D:/Data/img/vehicle/" + model_name + "/env/";
 #endif
 
 class ModelRenderer
