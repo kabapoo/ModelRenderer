@@ -39,7 +39,7 @@ ModelRenderer::ModelRenderer(GLFWwindow* window, Camera* _camera)
 	// basic material
 	glm::vec3 color(0.9f, 0.9f, 0.9f);
 	float metal = 1.00f;
-	float rough = 0.05f;
+	float rough = 0.1f;
 	pMaterial = new Material(color, rough, metal);
 
 	pPBRShader = NULL;
@@ -53,7 +53,7 @@ ModelRenderer::ModelRenderer(GLFWwindow* window, Camera* _camera)
 	pModel->position = glm::mat4(1.0f);
 	//pModel->position = glm::rotate(pModel->position, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
 	//pModel->position = glm::translate(pModel->position, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-	pModel->position = glm::scale(pModel->position, glm::vec3(0.5f, 0.5f, 0.5f));	// it's a bit too big for our scene, so scale it down
+	pModel->position = glm::scale(pModel->position, glm::vec3(scale_value));	// it's a bit too big for our scene, so scale it down
 }
 
 void ModelRenderer::run(GLFWwindow* _window)
@@ -120,8 +120,9 @@ void ModelRenderer::save(GLFWwindow* _window, std::string _path)
 	std::vector<std::string> env_name;
 	int env_count = 0;
 	pCubemap->loadEnvfromDirectory(env_path, env_list, env_name, env_count);
+	int per_env = (int)(param_row / env_count);
 
-	for (int i = 0; i < ENV_NUM; i++)
+	for (int i = 0; i < env_count; i++)
 	{
 		createMaps(env_list[i].c_str());
 
@@ -129,7 +130,7 @@ void ModelRenderer::save(GLFWwindow* _window, std::string _path)
 		glfwGetFramebufferSize(_window, &scrWidth, &scrHeight);
 		glViewport(0, 0, scrWidth, scrHeight);
 
-		for (int j = 0; j < 10; j++)
+		for (int j = 0; j < per_env; j++)
 		{
 			cnt = i * 10 + j;
 			// set camera view

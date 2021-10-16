@@ -27,8 +27,6 @@
 #define SCR_WIDTH 640
 #define SCR_HEIGHT 640
 
-#define ENV_NUM 100
-
 double lastX = SCR_WIDTH / 2.0;
 double lastY = SCR_HEIGHT / 2.0;
 bool firstMouse = true;
@@ -53,32 +51,36 @@ std::vector<std::array<float, 5>> params;
 GLFWwindow*		initGL();
 
 #define DRAW_MODE 1
+std::string category1 = "vehicle";
+std::string category2 = "car";
 std::string model_name = "1995-jaguar-xj12-lwb-x305";
+
+const float scale_value = 0.35f;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 1.0f));
 #if DRAW_MODE == 1
-const float camera_dist = 18.0f;
+const float camera_dist = 12.0f;
 #elif DRAW_MODE == 2
 const float camera_dist = 3.0f;
 #elif DRAW_MODE == 3
 const float camera_dist = 3.0f;
 #endif
 
-std::string param_path = "D:/Data/param/input/" + model_name + ".bin";
 const int param_row = 1000;
-std::string camera_path = "D:/Data/param/input/" + model_name + "_camera_dist.bin";
-std::string model_path = "D:/Data/models/vehicle/" + model_name + ".obj";
+std::string param_path = "D:/Data/param/input/" + category1 + "/" + category2 + "/" + model_name + ".bin";
+std::string camera_path = "D:/Data/param/input/" + category1 + "/" + category2 + "/" + model_name + "_camera_dist.bin";
+std::string model_path = "D:/Data/models/" + category1 + "/" + category2 + "/" + model_name + ".obj";
 
-std::string env_path = "D:/Data/env/";
+std::string env_path = "D:/Data/env/train/";
 std::string env_filename = "pink_sunrise_4k.hdr";
 
 #if DRAW_MODE == 1
-std::string save_path = "D:/Data/img/vehicle/" + model_name + "/origin/";
+std::string save_path = "D:/Data/img/" + category1 + "/" + category2 + "/" + model_name + "/origin/";
 #elif DRAW_MODE == 2
-std::string save_path = "D:/Data/img/vehicle/" + model_name + "/sphere/";
+std::string save_path = "D:/Data/img/" + category1 + "/" + category2 + "/" + model_name + "/sphere/";
 #elif DRAW_MODE == 3
-std::string save_path = "D:/Data/img/vehicle/" + model_name + "/env/";
+std::string save_path = "D:/Data/img/" + category1 + "/" + category2 + "/" + model_name + "/env/";
 #endif
 
 class ModelRenderer
