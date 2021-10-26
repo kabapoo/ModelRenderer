@@ -50,21 +50,22 @@ std::vector<std::array<float, 5>> params;
 
 GLFWwindow*		initGL();
 
-#define DRAW_MODE 1
+#define DRAW_MODE 3
 std::string category1 = "vehicle";
-std::string category2 = "car";
-std::string model_name = "1995-jaguar-xj12-lwb-x305";
-
-const float scale_value = 0.35f;
+std::string category2 = "aircraft";
+std::string model_name = "let-l410-turbolet";
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 1.0f));
 #if DRAW_MODE == 1
-const float camera_dist = 12.0f;
+const float camera_dist = 13.0f;
+const float scale_value = 0.7f;
 #elif DRAW_MODE == 2
 const float camera_dist = 3.0f;
+const float scale_value = 1.00f;
 #elif DRAW_MODE == 3
 const float camera_dist = 3.0f;
+const float scale_value = 1.00f;
 #endif
 
 const int param_row = 1000;

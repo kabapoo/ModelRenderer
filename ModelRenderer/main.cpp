@@ -132,7 +132,7 @@ void ModelRenderer::save(GLFWwindow* _window, std::string _path)
 
 		for (int j = 0; j < per_env; j++)
 		{
-			cnt = i * 10 + j;
+			cnt = i * per_env + j;
 			// set camera view
 			std::array<float, 2> view_angle = view_angles[cnt];
 			pCamera->SetPositionDist(view_angle[0], view_angle[1], camera_dist);
