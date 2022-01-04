@@ -128,7 +128,7 @@ Irradiancemap::Irradiancemap(const char* vert, const char* frag, Cubemap* p)
 // create an irradiance cubemap, and re-scale capture FBO to irradiance scale.
 void Irradiancemap::create()
 {
-    GLsizei IS = 32;
+    GLsizei IS = 128;
     glBindTexture(GL_TEXTURE_CUBE_MAP, id);
     for (unsigned int i = 0; i < 6; ++i)
     {
@@ -233,9 +233,10 @@ BRDFmap::BRDFmap(const char* vert, const char* frag, Cubemap* p)
 // create a pre-filter cubemap, and re-scale capture FBO to pre-filter scale.
 void BRDFmap::create()
 {
+    GLsizei BS = 512;
     // pre-allocate enough memory for the LUT texture.
     glBindTexture(GL_TEXTURE_2D, id);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, 512, 512, 0, GL_RG, GL_FLOAT, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, BS, BS, 0, GL_RG, GL_FLOAT, 0);
     // be sure to set wrapping mode to GL_CLAMP_TO_EDGE
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -245,10 +246,10 @@ void BRDFmap::create()
     // then re-configure capture framebuffer object and render screen-space quad with BRDF shader.
     glBindFramebuffer(GL_FRAMEBUFFER, pCubemap->getFBO());
     glBindRenderbuffer(GL_RENDERBUFFER, pCubemap->getRBO());
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, BS, BS);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, id, 0);
 
-    glViewport(0, 0, 512, 512);
+    glViewport(0, 0, BS, BS);
     pShader->use();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     quad.render();

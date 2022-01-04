@@ -118,7 +118,10 @@
     <None Include="shader_code\prefilter.frag">
       <Filter>Source Files\GLSL</Filter>
     </None>
-    <None Include="pbrTexture.frag">
+    <None Include="shader_code\pbrNormal.frag">
+      <Filter>Source Files\GLSL</Filter>
+    </None>
+    <None Include="shader_code\pbrTexture.frag">
       <Filter>Source Files\GLSL</Filter>
     </None>
   </ItemGroup>

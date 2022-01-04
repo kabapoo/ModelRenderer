@@ -20,6 +20,7 @@ enum Camera_Movement {
 // Default camera values
 const float YAW         = -90.0f;
 const float PITCH       =  0.0f;
+const float BANK        =  0.0f;
 const float SPEED       =  2.5f;
 const float SENSITIVITY =  0.1f;
 const float ZOOM        =  45.0f;
@@ -38,6 +39,7 @@ public:
     // Euler Angles
     float Yaw;
     float Pitch;
+    float Bank;
     // Camera options
     float MovementSpeed;
     float MouseSensitivity;
@@ -67,6 +69,22 @@ public:
     glm::mat4 GetViewMatrix()
     {
         return glm::lookAt(Position, Position + Front, Up);
+        //return glm::lookAt(Position, glm::vec3(0.0f, 0.0f, 0.0f), Up);
+    }
+
+    glm::mat4 GetRUDMatrix()
+    {
+        glm::mat4 RUD;
+        RUD[0][0] = Right.x; RUD[0][1] = Up.x; RUD[0][2] = Position.x; RUD[0][3] = 0.0f;
+        RUD[1][0] = Right.y; RUD[1][1] = Up.y; RUD[1][2] = Position.y; RUD[1][3] = 0.0f;
+        RUD[2][0] = Right.z; RUD[2][1] = Up.z; RUD[2][2] = Position.z; RUD[2][3] = 0.0f;
+        RUD[3][0] = 0.0f; RUD[3][1] = 0.0f; RUD[3][2] = 0.0f; RUD[3][3] = 1.0f;
+
+        std::cout << RUD[0][0] << " " << RUD[0][1] << " " << RUD[0][2] << " " << RUD[0][3] << std::endl;
+        std::cout << RUD[1][0] << " " << RUD[1][1] << " " << RUD[1][2] << " " << RUD[1][3] << std::endl;
+        std::cout << RUD[2][0] << " " << RUD[2][1] << " " << RUD[2][2] << " " << RUD[2][3] << std::endl;
+        std::cout << RUD[3][0] << " " << RUD[3][1] << " " << RUD[3][2] << " " << RUD[3][3] << std::endl;
+        return RUD;
     }
 
     glm::vec3 getPosition() const
@@ -86,7 +104,9 @@ public:
     // for random sample rendering
     void SetRandomPosition(float dist);
     void SetPosition(float yaw, float pitch);
+    void SetPosition(float yaw, float pitch, float bank);
     void SetPositionDist(float yaw, float pitch, float dist);
+    void SetPositionDist(float yaw, float pitch, float bank, float dist);
 
 private:
     // Calculates the front vector from the Camera's (updated) Euler Angles

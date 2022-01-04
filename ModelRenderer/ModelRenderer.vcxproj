@@ -174,7 +174,6 @@
     <ClCompile Include="stb_image_write.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="pbrTexture.frag" />
     <None Include="shader_code\background.frag" />
     <None Include="shader_code\background.vert" />
     <None Include="shader_code\brdf.frag" />
@@ -184,6 +183,8 @@
     <None Include="shader_code\irradiance.frag" />
     <None Include="shader_code\pbr.frag" />
     <None Include="shader_code\pbr.vert" />
+    <None Include="shader_code\pbrNormal.frag" />
+    <None Include="shader_code\pbrTexture.frag" />
     <None Include="shader_code\prefilter.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

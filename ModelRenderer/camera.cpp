@@ -19,7 +19,7 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constr
     yoffset *= MouseSensitivity;
 
     Yaw   += xoffset;
-    Pitch += yoffset;
+    Pitch -= yoffset;
 
     // Make sure that when pitch is out of bounds, screen doesn't get flipped
     if (constrainPitch)
@@ -48,23 +48,28 @@ void Camera::updateCameraVectors()
 {
     // Calculate the new Front vector
     glm::vec3 front;
-    front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-    front.y = sin(glm::radians(Pitch));
-    front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+    front.x = -cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+    front.y = -sin(glm::radians(Pitch));
+    front.z = -sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+    //Up.x = sin(glm::radians(Bank));
+    //Up.y = cos(glm::radians(Bank));
+    //Up.z = 0.0f;
     Front = glm::normalize(front);
     // Also re-calculate the Right and Up vector
     Right = glm::normalize(glm::cross(Front, WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
     Up    = glm::normalize(glm::cross(Right, Front));
     //std::cout << front.x << " " << front.y << " " << front.z << std::endl;
+    //std::cout << Right.x << " " << Right.y << " " << Right.z << std::endl;
 }
 
 void Camera::SetRandomPosition(float dist)
 {
     Yaw = (float)(rand() % 360 - 180);
     Pitch = -(float)(rand() % 45);
-    Position.x = -cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-    Position.y = -sin(glm::radians(Pitch));
-    Position.z = -sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+    Bank = (float)(rand() % 30 - 15);
+    Position.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+    Position.y = sin(glm::radians(Pitch));
+    Position.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
     Position = glm::normalize(Position);
     Position = Position * dist;
     //std::cout << Position.x << " " << Position.y << " " << Position.z << std::endl;
@@ -75,12 +80,22 @@ void Camera::SetPosition(float yaw, float pitch)
 {
     Yaw = yaw;
     Pitch = pitch;
-    Position.x = -cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-    Position.y = -sin(glm::radians(Pitch));
-    Position.z = -sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+    Position.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+    Position.y = sin(glm::radians(Pitch));
+    Position.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
     Position = glm::normalize(Position);
-    Position = Position * (3.0f + (float)(rand() % 200) / 1000.0f);
-    //std::cout << Position.x << " " << Position.y << " " << Position.z << std::endl;
+    updateCameraVectors();
+}
+
+void Camera::SetPosition(float yaw, float pitch, float bank)
+{
+    Yaw = yaw;
+    Pitch = pitch;
+    Bank = bank;
+    Position.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+    Position.y = sin(glm::radians(Pitch));
+    Position.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+    Position = glm::normalize(Position);
     updateCameraVectors();
 }
 
@@ -88,11 +103,25 @@ void Camera::SetPositionDist(float yaw, float pitch, float dist)
 {
     Yaw = yaw;
     Pitch = pitch;
-    Position.x = -cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-    Position.y = -sin(glm::radians(Pitch));
-    Position.z = -sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+    Position.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+    Position.y = sin(glm::radians(Pitch));
+    Position.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
     Position = glm::normalize(Position);
     Position = Position * dist;
     //std::cout << Position.x << " " << Position.y << " " << Position.z << std::endl;
+    updateCameraVectors();
+}
+
+void Camera::SetPositionDist(float yaw, float pitch, float bank, float dist)
+{
+    Yaw = yaw;
+    Pitch = pitch;
+    Bank = bank;
+    Position.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+    Position.y = sin(glm::radians(Pitch));
+    Position.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+    Position = glm::normalize(Position);
+    Position = Position * dist;
+    std::cout << Position.x << " " << Position.y << " " << Position.z << std::endl;
     updateCameraVectors();
 }

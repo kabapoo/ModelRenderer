@@ -2,19 +2,20 @@
 
 int main(int argc, char* argv[])
 {
+	srand(time(0));
 	GLFWwindow* window = initGL();
 	ModelRenderer mainRenderer(window, &camera);
 
 	// load parameter file
-	view_angles = load2Params(camera_path.c_str(), param_row);
-	params = load5Params(param_path.c_str(), param_row);
+	view_angles = loadCamParams(camera_path.c_str(), param_row);
+	params = loadRenderParams(param_path.c_str(), param_row);
 
 	// Load various shaders
 	mainRenderer.loadShaders();
 
 	// main rendering loop
-	//mainRenderer.run(window);
-	mainRenderer.save(window, save_path);
+	mainRenderer.run(window);
+	//mainRenderer.save(window, save_path);
 
 	// optional: de-allocate all resources once they've outlived their purpose:
 	// ------------------------------------------------------------------------
@@ -32,7 +33,8 @@ ModelRenderer::ModelRenderer(GLFWwindow* window, Camera* _camera)
 {
 	pWindow = window;
 	pCamera = _camera;
-	
+	pNormalCamera = new Camera(glm::vec3(0.0f, 0.0f, 1.0f));
+
 	pSphere = new Sphere(128, 128);
 	pCube = new Cube();
 
@@ -49,11 +51,18 @@ ModelRenderer::ModelRenderer(GLFWwindow* window, Camera* _camera)
 	pBRDFmap = NULL;
 	pBackgroundShader = NULL;
 
-	pModel = new Model(model_path.c_str());
+	pModel = new Model(model_path + model_name + ".obj");
 	pModel->position = glm::mat4(1.0f);
-	//pModel->position = glm::rotate(pModel->position, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
-	//pModel->position = glm::translate(pModel->position, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-	pModel->position = glm::scale(pModel->position, glm::vec3(scale_value));	// it's a bit too big for our scene, so scale it down
+#if DRAW_MODE == 1 || DRAW_MODE == 4
+	std::array<float, 9> stats = readTxtFile(model_path + model_name + ".txt");
+	camera_dist = stats[0];
+	//pModel->position = glm::rotate(pModel->position, glm::radians(0.0f), glm::vec3(1.0, 0.0, 0.0));
+	//pModel->position = glm::translate(pModel->position, glm::vec3(0.0f, -0.1f, 0.0f)); // translate it down so it's at the center of the scene
+	//pModel->position = glm::scale(pModel->position, glm::vec3(4.0f));	// it's a bit too big for our scene, so scale it down
+	pModel->position = glm::rotate(pModel->position, glm::radians(stats[1]), glm::vec3(stats[2], stats[3], stats[4]));
+	pModel->position = glm::translate(pModel->position, glm::vec3(stats[5], stats[6], stats[7])); // translate it down so it's at the center of the scene
+	pModel->position = glm::scale(pModel->position, glm::vec3(stats[8]));	// it's a bit too big for our scene, so scale it down
+#endif
 }
 
 void ModelRenderer::run(GLFWwindow* _window)
@@ -64,7 +73,7 @@ void ModelRenderer::run(GLFWwindow* _window)
 	glfwGetFramebufferSize(_window, &scrWidth, &scrHeight);
 	glViewport(0, 0, scrWidth, scrHeight);
 
-	pCamera->SetRandomPosition(camera_dist);
+	pCamera->SetPositionDist(0.0f, 0.0f, 0.0f, camera_dist);
 
 	while (!glfwWindowShouldClose(pWindow))
 	{
@@ -95,7 +104,12 @@ void ModelRenderer::run(GLFWwindow* _window)
 
 		//pSphere->render();
 		pPBRShader->setMat4("model", pModel->position);
+#if DRAW_MODE == 1 || DRAW_MODE == 4
 		pModel->Draw(pPBRShader);
+		//pSphere->render();
+#elif DRAW_MODE == 2 || DRAW_MODE == 3
+		pSphere->render();
+#endif
 
 		// skybox
 		pBackgroundShader->use();
@@ -134,22 +148,19 @@ void ModelRenderer::save(GLFWwindow* _window, std::string _path)
 		{
 			cnt = i * per_env + j;
 			// set camera view
-			std::array<float, 2> view_angle = view_angles[cnt];
-			pCamera->SetPositionDist(view_angle[0], view_angle[1], camera_dist);
+			std::array<float, CAMERA_DIMS> view_angle = view_angles[cnt];
+			pCamera->SetPositionDist(view_angle[0], view_angle[1], view_angle[2], camera_dist);
+			pNormalCamera->SetPositionDist(pCamera->Yaw, pCamera->Pitch, pCamera->Bank, 1.0f);
 
 			// render
 			// ------
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-#if DRAW_MODE == 1 || DRAW_MODE == 2
-			std::array<float, 5> param = params[cnt];
+#if DRAW_MODE == 1 || DRAW_MODE == 2 || DRAW_MODE == 4
+			std::array<float, RENDER_DIMS> param = params[cnt];
 			pMaterial->setColor(glm::vec3(param[0], param[1], param[2]));
 			pMaterial->setMetallic(param[3]);
 			pMaterial->setRoughness(param[4]);
-#elif DRAW_MODE == 3
-			pMaterial->setColor(pMaterial->getColor());
-			pMaterial->setMetallic(pMaterial->getMetallic());
-			pMaterial->setRoughness(pMaterial->getRoughness());
 #endif
 			setPBRShader();
 			// bind pre-computed IBL data
@@ -161,7 +172,7 @@ void ModelRenderer::save(GLFWwindow* _window, std::string _path)
 			glBindTexture(GL_TEXTURE_2D, pBRDFmap->getID());
 
 			pPBRShader->setMat4("model", pModel->position); 
-#if DRAW_MODE == 1
+#if DRAW_MODE == 1 || DRAW_MODE == 4
 			pModel->Draw(pPBRShader);
 #elif DRAW_MODE == 2 || DRAW_MODE == 3
 			pSphere->render();
@@ -195,6 +206,9 @@ void ModelRenderer::setPBRShader()
 	pPBRShader->setMat4("projection", projection);
 	glm::mat4 view = pCamera->GetViewMatrix();
 	pPBRShader->setMat4("view", view);
+	pNormalCamera->SetPositionDist(pCamera->Yaw, pCamera->Pitch, pCamera->Bank, 1.0f);
+	glm::mat4 nor_view = pNormalCamera->GetRUDMatrix();
+	pPBRShader->setMat4("normal_view", nor_view);
 	glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
 	pPBRShader->setMat4("model", model);
 
@@ -256,7 +270,11 @@ void ModelRenderer::loadShaders()
 {
 	// build and compile our shader zprogram
 	// ------------------------------------
+#if DRAW_MODE != 4
 	pPBRShader = new Shader("./shader_code/pbr.vert", "./shader_code/pbr.frag");
+#else
+	pPBRShader = new Shader("./shader_code/pbr.vert", "./shader_code/pbrNormal.frag");
+#endif
 	pCubemap = new Cubemap("./shader_code/cubemap.vert", "./shader_code/cubemap.frag");
 	pIrradiancemap = new Irradiancemap("./shader_code/cubemap.vert", "./shader_code/irradiance.frag", pCubemap);
 	pPrefilteredmap = new Prefilteredmap("./shader_code/cubemap.vert", "./shader_code/prefilter.frag", pCubemap);
@@ -374,19 +392,19 @@ bool saveScreenshot(std::string filename, int width, int height)
 	return true;
 }
 
-std::vector<std::array<float, 2>> load2Params(const char* filename, int rows)
+std::vector<std::array<float, CAMERA_DIMS>> loadCamParams(const char* filename, int rows)
 {
 	std::ifstream fin;
 	fin.open(filename, std::ios::in | std::ios::binary);
 
-	std::vector<std::array<float, 2>> samples;
-	std::array<float, 2> temp;
+	std::vector<std::array<float, CAMERA_DIMS>> samples;
+	std::array<float, CAMERA_DIMS> temp;
 
-	float param[2];
+	float param[CAMERA_DIMS];
 	for (int i = 0; i < rows; ++i)
 	{
 		fin.read((char*)param, sizeof(param));
-		for (int j = 0; j < 2; ++j)
+		for (int j = 0; j < CAMERA_DIMS; ++j)
 		{
 			temp[j] = param[j];
 		}
@@ -396,19 +414,19 @@ std::vector<std::array<float, 2>> load2Params(const char* filename, int rows)
 	return samples;
 }
 
-std::vector<std::array<float, 5>> load5Params(const char* filename, int rows)
+std::vector<std::array<float, RENDER_DIMS>> loadRenderParams(const char* filename, int rows)
 {
 	std::ifstream fin;
 	fin.open(filename, std::ios::in | std::ios::binary);
 
-	std::vector<std::array<float, 5>> samples;
-	std::array<float, 5> temp;
+	std::vector<std::array<float, RENDER_DIMS>> samples;
+	std::array<float, RENDER_DIMS> temp;
 
-	float param[5];
+	float param[RENDER_DIMS];
 	for (int i = 0; i < rows; ++i)
 	{
 		fin.read((char*)param, sizeof(param));
-		for (int j = 0; j < 5; ++j)
+		for (int j = 0; j < RENDER_DIMS; ++j)
 		{
 			temp[j] = param[j];
 		}
@@ -416,4 +434,17 @@ std::vector<std::array<float, 5>> load5Params(const char* filename, int rows)
 	}
 	fin.close();
 	return samples;
+}
+
+
+std::array<float, 9> readTxtFile(std::string txtfile)
+{
+	std::array<float, 9> stats = { 0.0f };
+	std::ifstream fin(txtfile.c_str());
+	std::string type;
+	fin >> type >> stats[0];
+	fin >> type >> stats[1] >> stats[2] >> stats[3] >> stats[4];
+	fin >> type >> stats[5] >> stats[6] >> stats[7];
+	fin >> type >> stats[8];
+	return stats;
 }

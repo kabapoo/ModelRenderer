@@ -1,11 +1,13 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
+#include <Windows.h>
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <array>
 #include <string>
+#include <ctime>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -27,6 +29,16 @@
 #define SCR_WIDTH 640
 #define SCR_HEIGHT 640
 
+#define CAMERA_DIMS 3
+#define RENDER_DIMS 5
+
+// enable optimus!
+extern "C" {
+	_declspec(dllexport) DWORD NvOptimusEnablement = 1;
+	_declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+
+
 double lastX = SCR_WIDTH / 2.0;
 double lastY = SCR_HEIGHT / 2.0;
 bool firstMouse = true;
@@ -42,46 +54,48 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 bool saveScreenshot(std::string filename, int width, int height);
+std::array<float, 9> readTxtFile(std::string txtfile);
 
-std::vector<std::array<float, 2>> load2Params(const char* filename, int rows);
-std::vector<std::array<float, 2>> view_angles;
-std::vector<std::array<float, 5>> load5Params(const char* filename, int rows);
-std::vector<std::array<float, 5>> params;
+std::vector<std::array<float, CAMERA_DIMS>> loadCamParams(const char* filename, int rows);
+std::vector<std::array<float, CAMERA_DIMS>> view_angles;
+std::vector<std::array<float, RENDER_DIMS>> loadRenderParams(const char* filename, int rows);
+std::vector<std::array<float, RENDER_DIMS>> params;
 
 GLFWwindow*		initGL();
 
-#define DRAW_MODE 3
-std::string category1 = "vehicle";
-std::string category2 = "aircraft";
-std::string model_name = "let-l410-turbolet";
+#define DRAW_MODE 4
+std::string category1 = "vehicles";
+//std::string category2 = "..";
+std::string model_name = "old_tank";
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 1.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 #if DRAW_MODE == 1
-const float camera_dist = 13.0f;
-const float scale_value = 0.7f;
+float camera_dist = 3.0f;
 #elif DRAW_MODE == 2
-const float camera_dist = 3.0f;
-const float scale_value = 1.00f;
+float camera_dist = 2.626f;
 #elif DRAW_MODE == 3
-const float camera_dist = 3.0f;
-const float scale_value = 1.00f;
+float camera_dist = 2.626f;
+#elif DRAW_MODE == 4 
+float camera_dist = 4.0f;
 #endif
 
 const int param_row = 1000;
-std::string param_path = "D:/Data/param/input/" + category1 + "/" + category2 + "/" + model_name + ".bin";
-std::string camera_path = "D:/Data/param/input/" + category1 + "/" + category2 + "/" + model_name + "_camera_dist.bin";
-std::string model_path = "D:/Data/models/" + category1 + "/" + category2 + "/" + model_name + ".obj";
+std::string param_path = "D:/Data/param/input/" + category1 + "/" + model_name + ".bin";
+std::string camera_path = "D:/Data/param/input/" + category1 + "/" + model_name + "_camera_angle.bin";
+std::string model_path = "D:/Data/obj/" + category1 + "/";
 
-std::string env_path = "D:/Data/env/train/";
-std::string env_filename = "pink_sunrise_4k.hdr";
+std::string env_path = "D:/Data/env/mixed/train/";
+std::string env_filename = "abandoned_tank_farm_05_2k.hdr";
 
 #if DRAW_MODE == 1
-std::string save_path = "D:/Data/img/" + category1 + "/" + category2 + "/" + model_name + "/origin/";
+std::string save_path = "D:/Data/img/" + category1 + "/" + model_name + "/origin/";
 #elif DRAW_MODE == 2
-std::string save_path = "D:/Data/img/" + category1 + "/" + category2 + "/" + model_name + "/sphere/";
+std::string save_path = "D:/Data/img/" + category1 + "/" + model_name + "/sphere/";
 #elif DRAW_MODE == 3
-std::string save_path = "D:/Data/img/" + category1 + "/" + category2 + "/" + model_name + "/env/";
+std::string save_path = "D:/Data/img/" + category1 + "/" + model_name + "/env/";
+#elif DRAW_MODE == 4
+std::string save_path = "D:/Data/img/" + category1 + "/" + model_name + "/normal/";
 #endif
 
 class ModelRenderer
@@ -110,6 +124,8 @@ private:
 	Prefilteredmap* pPrefilteredmap;
 	BRDFmap* pBRDFmap;
 	Shader* pBackgroundShader;
+
+	Camera* pNormalCamera;
 
 	// sphere initialzied as radius, sectors, stacks
 	Sphere* pSphere;
