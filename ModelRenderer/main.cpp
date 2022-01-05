@@ -14,8 +14,8 @@ int main(int argc, char* argv[])
 	mainRenderer.loadShaders();
 
 	// main rendering loop
-	mainRenderer.run(window);
-	//mainRenderer.save(window, save_path);
+	//mainRenderer.run(window);
+	mainRenderer.save(window, save_path);
 
 	// optional: de-allocate all resources once they've outlived their purpose:
 	// ------------------------------------------------------------------------

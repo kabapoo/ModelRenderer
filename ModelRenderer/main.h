@@ -64,9 +64,9 @@ std::vector<std::array<float, RENDER_DIMS>> params;
 GLFWwindow*		initGL();
 
 #define DRAW_MODE 4
-std::string category1 = "vehicles";
+std::string category1 = "cars";
 //std::string category2 = "..";
-std::string model_name = "old_tank";
+std::string model_name = "1995-jaguar-xj12-lwb-x305";
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));

@@ -6,6 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <ctime>
 
@@ -69,7 +70,6 @@ public:
     glm::mat4 GetViewMatrix()
     {
         return glm::lookAt(Position, Position + Front, Up);
-        //return glm::lookAt(Position, glm::vec3(0.0f, 0.0f, 0.0f), Up);
     }
 
     glm::mat4 GetRUDMatrix()
@@ -79,17 +79,39 @@ public:
         RUD[1][0] = Right.y; RUD[1][1] = Up.y; RUD[1][2] = Position.y; RUD[1][3] = 0.0f;
         RUD[2][0] = Right.z; RUD[2][1] = Up.z; RUD[2][2] = Position.z; RUD[2][3] = 0.0f;
         RUD[3][0] = 0.0f; RUD[3][1] = 0.0f; RUD[3][2] = 0.0f; RUD[3][3] = 1.0f;
+        //showMat4(RUD);
 
-        std::cout << RUD[0][0] << " " << RUD[0][1] << " " << RUD[0][2] << " " << RUD[0][3] << std::endl;
-        std::cout << RUD[1][0] << " " << RUD[1][1] << " " << RUD[1][2] << " " << RUD[1][3] << std::endl;
-        std::cout << RUD[2][0] << " " << RUD[2][1] << " " << RUD[2][2] << " " << RUD[2][3] << std::endl;
-        std::cout << RUD[3][0] << " " << RUD[3][1] << " " << RUD[3][2] << " " << RUD[3][3] << std::endl;
         return RUD;
     }
 
     glm::vec3 getPosition() const
     {
         return Position;
+    }
+
+    void showVec3(glm::vec3 v)
+    {
+        std::cout.precision(5);
+        std::cout << "{ " << v[0] << ", " <<
+            v[1] << ", " << v[2] << " }" << std::endl;
+    }
+
+    void showVec4(glm::vec3 v)
+    {
+        std::cout.precision(5);
+        std::cout << "{ " << v[0] << ", " <<
+            v[1] << ", " << v[2] << ", " << v[3] << " }" << std::endl;
+    }
+
+    void showMat4(glm::mat4 m)
+    {
+        std::cout.precision(5);
+        std::cout << "------------------------------------------------------" << std::endl;
+        std::cout << std::setw(9) << m[0][0] << std::setw(9) << m[0][1] << std::setw(9) << m[0][2] << std::setw(9) << m[0][3] << std::endl;
+        std::cout << std::setw(9) << m[1][0] << std::setw(9) << m[1][1] << std::setw(9) << m[1][2] << std::setw(9) << m[1][3] << std::endl;
+        std::cout << std::setw(9) << m[2][0] << std::setw(9) << m[2][1] << std::setw(9) << m[2][2] << std::setw(9) << m[2][3] << std::endl;
+        std::cout << std::setw(9) << m[3][0] << std::setw(9) << m[3][1] << std::setw(9) << m[3][2] << std::setw(9) << m[3][3] << std::endl;
+        std::cout << "------------------------------------------------------" << std::endl;
     }
 
     // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)

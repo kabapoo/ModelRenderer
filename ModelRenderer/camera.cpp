@@ -51,15 +51,14 @@ void Camera::updateCameraVectors()
     front.x = -cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
     front.y = -sin(glm::radians(Pitch));
     front.z = -sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-    //Up.x = sin(glm::radians(Bank));
-    //Up.y = cos(glm::radians(Bank));
-    //Up.z = 0.0f;
+    glm::mat4 r = glm::rotate(glm::mat4(1.0f), glm::radians(-Yaw), glm::vec3(0.0f, 1.0f, 0.0f));
+    r = glm::rotate(r, glm::radians(-Pitch), glm::vec3(0.0f, 0.0f, -1.0f));
+    r = glm::rotate(r, glm::radians(-Bank), glm::vec3(1.0f, 0.0f, 0.0f));
+    Up = glm::normalize(glm::vec3(r * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)));
     Front = glm::normalize(front);
     // Also re-calculate the Right and Up vector
-    Right = glm::normalize(glm::cross(Front, WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
-    Up    = glm::normalize(glm::cross(Right, Front));
-    //std::cout << front.x << " " << front.y << " " << front.z << std::endl;
-    //std::cout << Right.x << " " << Right.y << " " << Right.z << std::endl;
+    Right = glm::normalize(glm::cross(Front, Up));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+    //Up    = glm::normalize(glm::cross(Right, Front));
 }
 
 void Camera::SetRandomPosition(float dist)
@@ -122,6 +121,6 @@ void Camera::SetPositionDist(float yaw, float pitch, float bank, float dist)
     Position.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
     Position = glm::normalize(Position);
     Position = Position * dist;
-    std::cout << Position.x << " " << Position.y << " " << Position.z << std::endl;
+    //std::cout << Position.x << " " << Position.y << " " << Position.z << std::endl;
     updateCameraVectors();
 }

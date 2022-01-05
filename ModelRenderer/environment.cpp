@@ -75,7 +75,7 @@ void Cubemap::setupMatrices()
 // convert HDR equirectangular environment map to cubemap equivalent
 void Cubemap::create()
 {
-    GLsizei CS = 512;
+    GLsizei CS = 256;
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, CS, CS);
@@ -233,7 +233,7 @@ BRDFmap::BRDFmap(const char* vert, const char* frag, Cubemap* p)
 // create a pre-filter cubemap, and re-scale capture FBO to pre-filter scale.
 void BRDFmap::create()
 {
-    GLsizei BS = 512;
+    GLsizei BS = 256;
     // pre-allocate enough memory for the LUT texture.
     glBindTexture(GL_TEXTURE_2D, id);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, BS, BS, 0, GL_RG, GL_FLOAT, 0);
